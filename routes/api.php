@@ -14,6 +14,27 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+
+
+
+Route::group(['namespace' => 'App\Http\Controllers\Api\Ecommerce'], function () {
+
+    Route::post('register', 'AuthController@register');
+    Route::post('login', 'AuthController@login');
+    Route::post('sendForgotPasswordEmail', 'AuthController@sendForgotPasswordEmail');
+    Route::post('verifyForgotPin', 'AuthController@verifyForgotPin');
+    Route::post('resetPassword', 'AuthController@resetPassword');
+
+    Route::get('dashboard', 'DashboardController@dashBoard');
+});
+
+
+
+Route::group(['namespace' => 'App\Http\Controllers\Api\Ecommerce', 'middleware' => 'auth:api'], function () {
+
+    Route::post('addToWishlist', 'WishlistController@addToWishlist');
+
 });

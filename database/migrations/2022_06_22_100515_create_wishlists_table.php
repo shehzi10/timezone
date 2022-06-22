@@ -13,11 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('wishlists', function (Blueprint $table) {
             $table->id();
-            $table->string('category_name')->nullable();
-            $table->string('category_image')->nullable();
-            $table->boolean('top_category')->default(0);
+            $table->foreignId('user_id');
+            $table->foreignId('product_id');
             $table->timestamps();
         });
     }
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('wishlists');
     }
 };
