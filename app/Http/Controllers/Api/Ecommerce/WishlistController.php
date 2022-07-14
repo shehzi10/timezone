@@ -9,31 +9,35 @@ use Illuminate\Support\Facades\Validator;
 
 class WishlistController extends Controller
 {
-    public function addToWishlist(Request $request){
+    public function addToWishlist(Request $request)
+    {
 
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'user_id'       =>  'required',
             'product_id'    =>  'required',
         ]);
-        if($validator->fails()){
+        if ($validator->fails()) {
             return apiresponse(false, implode("\n", $validator->errors()->all()));
         }
+        $check = Wishlist::where('user_id', auth()->user()->id)->where('product_id', $request->product_id)->get()->toArray();
+        if (!empty($check)) {
+            Wishlist::where('id', $check->id)->delete();
+            return apiresponse(true, 'Product removed from wishlist successfully');
+        } else {
+            $wishlist = new Wishlist();
+
+            $wishlist->user_id      =       auth()->user()->id;
+            $wishlist->product_id   =       $request->product_id;
 
 
-        $wishlist = new Wishlist();
-
-        $wishlist->user_id      =       auth()->user()->id;
-        $wishlist->product_id   =       $request->product_id;
+            $wishlist->save();
 
 
-        $wishlist->save();
-
-
-        if($wishlist){
-            return apiresponse(true, 'Product added to wishlist successfully', $wishlist);
-        }
-        else{
-            return apiresponse(false, 'Some error occured');
+            if ($wishlist) {
+                return apiresponse(true, 'Product added to wishlist successfully', $wishlist);
+            } else {
+                return apiresponse(false, 'Some error occured');
+            }
         }
     }
 }

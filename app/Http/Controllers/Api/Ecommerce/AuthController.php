@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Ecommerce;
 
 use App\Http\Controllers\Controller;
+use App\Models\CartItems;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -12,39 +13,48 @@ use Stripe\StripeClient;
 
 class AuthController extends Controller
 {
-    public function register(Request $request){
+    public $stripe = "";
 
-        $validator = Validator::make($request->all(),[
+    function __construct()
+    {
+        $this->stripe = new StripeClient(env("STRIPE_SECRET_KEY"));
+    }
+    public function register(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
             'name'      =>  'required',
             'email'     =>  'required|unique:users,email',
             'passowrd'  =>  'min:8|required_with:confirm_password|same:confirm_password',
         ]);
-        if($validator->fails()){
+        if ($validator->fails()) {
             return apiresponse(false, implode("\n", $validator->errors()->all()));
         }
 
-        // $stripe = new StripeClient(env("STRIPE_SECRET_KEY"));
-        // $stripeCustomer = $stripe->customers->create([
-        //     'email' => $request->email,
-        //     'name' => $request->username,
-        // ]);
+        $stripeCustomer = $this->stripe->customers->create([
+            'email' => $request->email,
+            'name' => $request->username,
+        ]);
+
         $data = $request->except(['password']);
-        // $data['stripe_customer_id'] = $stripeCustomer->id;
+        $data['stripe_customer_id'] = $stripeCustomer->id;
         $data['password'] = Hash::make($request->password);
 
         $user = User::create($data);
 
-            $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->first();
 
-            if ($user) {
+        if ($user) {
             if (Hash::check($request->password, $user->password)) {
                 if ($request->has('device_id') and !empty($request->device_id)) {
                     User::find($user->id)->update(['device_id' => $request->device_id]);
                     $user = User::find($user->id);
                 }
+
                 $data = [
                     'token' => $user->createToken('customer Token')->accessToken,
-                    'user' => $user
+                    'user' => $user,
+                    'cart'  => cartData($user),
                 ];
                 return apiresponse(true, 'Login Success', $data);
             } else {
@@ -53,7 +63,6 @@ class AuthController extends Controller
         } else {
             return apiresponse(false, 'Please try again');
         }
-
     }
 
     public function login(Request $request)
@@ -100,7 +109,7 @@ class AuthController extends Controller
         }
 
         $user = User::where('email', $request->email)->first();
-        if($request->code == $user->confirmation_code){
+        if ($request->code == $user->confirmation_code) {
             return apiresponse(true, 'Confirmation code has been matched successfully', $user);
         }
 

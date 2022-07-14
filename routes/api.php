@@ -29,12 +29,19 @@ Route::group(['namespace' => 'App\Http\Controllers\Api\Ecommerce'], function () 
     Route::post('resetPassword', 'AuthController@resetPassword');
 
     Route::get('dashboard', 'DashboardController@dashBoard');
+    Route::get('all_brands', 'DashboardController@allBrands');
+    Route::get('all_categories', 'DashboardController@allCategories');
+    Route::get('all_watches/{type}', 'DashboardController@allCategories');
+    Route::get('watch_detail/{id}', 'DashboardController@watchDetail');
+    Route::get('search/{keyword}', 'DashboardController@search');
 });
 
 
 
 Route::group(['namespace' => 'App\Http\Controllers\Api\Ecommerce', 'middleware' => 'auth:api'], function () {
 
+    Route::post('addtocart', 'CartController@addToCart');
+    Route::post('updatecart', 'CartController@updateCart');
+    Route::post('removecart', 'CartController@removeFromCart');
     Route::post('addToWishlist', 'WishlistController@addToWishlist');
-
 });

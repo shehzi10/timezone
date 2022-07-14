@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\CartItems;
 use App\Models\User;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Messaging\CloudMessage;
@@ -47,3 +48,15 @@ if (!function_exists('SendNotification')) {
     }
 }
 
+if (!function_exists('cartData')) {
+    function cartData($user)
+    {
+        $cart_data = CartItems::leftjoin('products', 'products.id', 'cart_items.product_id')
+            ->where('cart_items.user_id', $user->id)->get()->toArray();
+        foreach ($cart_data as $key => $value) {
+            $cart_data[$key]['cart_price'] = ($value['quantity'] * $value['price']);
+        }
+
+        return $cart_data;
+    }
+}
