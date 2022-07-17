@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api\Ecommerce;
 
 use App\Http\Controllers\Controller;
+use App\Models\Address;
 use App\Models\CartItems;
+use App\Models\PaymentMethods;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -54,7 +56,9 @@ class AuthController extends Controller
                 $data = [
                     'token' => $user->createToken('customer Token')->accessToken,
                     'user' => $user,
-                    'cart'  => cartData($user),
+                    'payment_methods' => PaymentMethods::where('user_id', $user->id)->get()->toArray(),
+                    'addresses' => Address::where('user_id', $user->id)->get()->toArray(),
+                    // 'cart'  => cartData($user),
                 ];
                 return apiresponse(true, 'Login Success', $data);
             } else {

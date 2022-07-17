@@ -8,8 +8,11 @@ use App\Models\Discount;
 use App\Models\OrderItems;
 use App\Models\Orders;
 use App\Models\Product;
+use App\Models\Vat;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Stripe\Order;
 use Stripe\StripeClient;
 
 class OrderController extends Controller
@@ -23,40 +26,35 @@ class OrderController extends Controller
     public function placeOrder(Request $request)
     {
         try {
-
-            $cartItems = CartItems::where('user_id', $request->user()->id)->get();
+            $vat = Vat::get();
+            $cartItems = $request->cartData;
             $orderItems = array();
+            $order_id = rand(0000, 9999);
+            $total_discount = 0;
             foreach ($cartItems as $item) {
-                $prd = Product::where('id', $item->product_id)->first();
-                $price = $prd->price * $item->quantity;
-                $total = $discount_amount = 0;
-                if ($item->discount_id > 0) {
+                $discount_amount = 0;
+                if ($item->discount_id != "") {
                     $dis = Discount::where('id', $item->discount_id)->first();
                     if ($dis->discount_type == 'percent') {
-                        $discount_amount = ($price / 100) * $dis->discount_amount;
+                        $discount_amount = ($item->price / 100) * $dis->discount_amount;
                     } else {
                         $discount_amount = $dis->discount_amount;
                     }
-                    $total = $price - $discount_amount;
                 }
                 $orderItems[] = [
                     'user_id'           => $item->user_id,
                     'product_id'        => $item->product_id,
                     'quantity'          => $item->quantity,
-                    'price'             => $price,
-                    'order_id'          => $item->cart_id,
+                    'price'             => $item->price,
+                    'order_id'          => $order_id,
                     'discount_id'       => ($discount_amount > 0) ? $dis->id : 0,
                     'discount_amount'   => $discount_amount,
-                    'total_price'       => ($total > 0) ? $total : $price,
+                    'total_price'       => ($this->price - $discount_amount),
                 ];
+                $total_discount += $discount_amount;
             }
             OrderItems::insert($orderItems);
-            $order = Orders::create([
-                'user_id' => $request->user()->id,
-                'order_id' => $cartItems[0]->cart_id,
-                'payment_method_id' =>  $request->payment_stripe_id,
-                'sub_total'         =>  $request->sub_total,
-            ]);
+
             $payment = $this->stripe->charges->create([
                 "amount" => 100 * ($request->total),
                 "currency" => "AED",
@@ -65,13 +63,32 @@ class OrderController extends Controller
                 "description" => "TimeZone Order."
             ]);
 
-            $order_detail['charge_id'] = $payment->id;
-            $order_detail['blc_transaction'] = $payment->balance_transaction;
+            $order = Orders::create([
+                'user_id'               => $request->user()->id,
+                'order_id'              => $order_id,
+                'payment_method_id'     => $request->source_id,
+                'delivery_address_id'   =>  $request->delivery_address_id,
+                'sub_total'             => $request->sub_total,
+                'discount_amount'       => $total_discount,
+                'vat_percent'           => $vat->vat_percent,
+                'vat_amount'            => $request->tax,
+                'total'                 => $request->total,
+                'charge_id'             => $payment->id,
+                'blc_transaction_id'    => $payment->balance_transaction,
+            ]);
 
-            return apiresponse(true, 'order places successfull', $order_detail);
+            return apiresponse(true, 'order places successfull',  $order);
             // return ['charge_id' => $charge_id, "transaction_id" => $blc_transaction];
         } catch (Exception $e) {
             return apiresponse("false", "error", $e->getMessage());
         }
     }
+
+    // public function getOrders()
+    // {
+    //     $orders = Orders::leftjoin('orderI')->where('user_id', Auth::user()->id)->paginate(10)->toArray();
+    //     foreach ($orders as $key => $value) {
+    //         $orders[$key]['product_detail']
+    //     }
+    // }
 }

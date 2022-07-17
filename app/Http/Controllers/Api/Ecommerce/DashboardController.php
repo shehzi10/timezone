@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Ecommerce;
 
 use App\Http\Controllers\Controller;
+use App\Models\Address;
 use App\Models\Banners;
 use App\Models\Brand;
 use App\Models\Category;
@@ -88,5 +89,14 @@ class DashboardController extends Controller
     {
         $products = Product::where('product_name', 'LIKE', '%' . $keyword . '%')->paginate(10)->toArray();
         return apiresponse(true, 'Search Result', $products);
+    }
+
+    public function addAddress(Request $request)
+    {
+        Address::create([
+            'user_id' => $request->user()->id,
+            'delivery_address'  =>  $request->address,
+        ]);
+        return apiresponse(true, 'Address added successfully', Address::where('user_id', $request->user()->id)->get()->toArray());
     }
 }

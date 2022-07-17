@@ -18,12 +18,14 @@ return new class extends Migration
             $table->integer('user_id');
             $table->integer('order_id');
             $table->integer('payment_method_id');
+            $table->integer('delivery_address_id');
             $table->double('sub_total');
             $table->integer('vat_percent')->nullable();
             $table->double('vat_amount')->nullable();
-            $table->integer('discount_id')->nullable();
             $table->double('discount_amount')->nullable();
             $table->double('total');
+            $table->string('charge_id');
+            $table->tinyText('blc_transaction_id');
             $table->enum('status', ['in-process', 'cancel', 'complete', 'refund', 'on-hold', 'out-for-delivery'])->default('in-process');
             $table->timestamps();
         });
