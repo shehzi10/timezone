@@ -61,7 +61,7 @@ class PaymentMethodController extends Controller
                 'user_id' => $user->id,
                 'is_default' => $willBeDefault,
             ]);
-            $pms = PaymentMethods::where('user_id', $user->id)->get();
+            $pms = PaymentMethods::where('user_id', $user->id)->paginate(10)->toArray();
             $user = User::where("id", $user->id)->first();
             return response()->json(['status' => 'success', 'msg' => 'Payment Method Updated', 'data' => ['user' => $user, 'pms' => $pms]]);
         } catch (Exception $e) {
@@ -72,7 +72,7 @@ class PaymentMethodController extends Controller
     public function showMethod(Request $request)
     {
         $user = $request->user();
-        $data  = PaymentMethods::where(['user_id' => $user->id, 'status' => '0'])->get();
+        $data  = PaymentMethods::where(['user_id' => $user->id, 'status' => '0'])->paginate(10)->toArray();
         if ($data) {
             return response()->json(['status' => 'success', 'msg' => 'Payment Methods Found', 'data' => $data]);
         } else {
