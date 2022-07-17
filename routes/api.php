@@ -47,6 +47,6 @@ Route::group(['namespace' => 'App\Http\Controllers\Api\Ecommerce', 'middleware' 
     // Route::post('removecart', 'CartController@removeFromCart');
     Route::post('add_card', 'PaymentMethodController@addPaymentMethod');
     Route::get('show_cards', 'PaymentMethodController@showMethod');
-    Route::get('delete_cards', 'PaymentMethodController@deleteMethod');
+    Route::post('delete_cards', 'PaymentMethodController@deleteMethod');
     Route::post('addToWishlist', 'WishlistController@addToWishlist');
 });
