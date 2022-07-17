@@ -1,7 +1,9 @@
 <?php
 
 use App\Models\CartItems;
+use App\Models\Discount;
 use App\Models\User;
+use App\Models\Vat;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
@@ -53,10 +55,30 @@ if (!function_exists('cartData')) {
     {
         $cart_data = CartItems::leftjoin('products', 'products.id', 'cart_items.product_id')
             ->where('cart_items.user_id', $user->id)->get()->toArray();
+        $grand_total = $sub_total = 0;
         foreach ($cart_data as $key => $value) {
+            $price = $value->price * $value->quantity;
+            $total = $discount_amount = 0;
+            if ($value->discount_id > 0) {
+                $dis = Discount::where('id', $value->discount_id)->first();
+                if ($dis->discount_type == 'percent') {
+                    $discount_amount = ($price / 100) * $dis->discount_amount;
+                } else {
+                    $discount_amount = $dis->discount_amount;
+                }
+                $total = $price - $discount_amount;
+            }
             $cart_data[$key]['cart_price'] = ($value['quantity'] * $value['price']);
+            $cart_data[$key]['cart_total'] = ($total > 0) ? $total : $price;
+            $grand_total += $cart_data[$key]['cart_total'];
+            $sub_total += $cart_data[$key]['cart_price'];
         }
-
+        $vat = Vat::first();
+        $cart_data['vat_percent'] = $vat->percent;
+        $cart_data['vat_amount']  = ($grand_total / 100) * $cart_data['vat_percent'];
+        $cart_data['grand_total'] = $grand_total;
+        $cart_data['sub_total'] = $sub_total;
+        $cart_data['grand_total_after_vat'] = $grand_total - $cart_data['vat_amount'];
         return $cart_data;
     }
 }

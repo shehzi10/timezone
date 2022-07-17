@@ -30,7 +30,9 @@ Route::group(['namespace' => 'App\Http\Controllers\Api\Ecommerce'], function () 
 
     Route::get('dashboard', 'DashboardController@dashBoard');
     Route::get('all_brands', 'DashboardController@allBrands');
+    Route::get('all_brands/{search}', 'DashboardController@allBrands');
     Route::get('all_categories', 'DashboardController@allCategories');
+    Route::get('all_categories/{search}', 'DashboardController@allCategories');
     Route::get('all_watches/{type}', 'DashboardController@allCategories');
     Route::get('watch_detail/{id}', 'DashboardController@watchDetail');
     Route::get('search/{keyword}', 'DashboardController@search');
@@ -40,8 +42,11 @@ Route::group(['namespace' => 'App\Http\Controllers\Api\Ecommerce'], function () 
 
 Route::group(['namespace' => 'App\Http\Controllers\Api\Ecommerce', 'middleware' => 'auth:api'], function () {
 
-    Route::post('addtocart', 'CartController@addToCart');
-    Route::post('updatecart', 'CartController@updateCart');
-    Route::post('removecart', 'CartController@removeFromCart');
+    // Route::post('addtocart', 'CartController@addToCart');
+    // Route::post('updatecart', 'CartController@updateCart');
+    // Route::post('removecart', 'CartController@removeFromCart');
+    Route::post('add_card', 'PaymentMethodController@addPaymentMethod');
+    Route::get('show_cards', 'PaymentMethodController@showMethod');
+    Route::get('delete_cards', 'PaymentMethodController@deleteMethod');
     Route::post('addToWishlist', 'WishlistController@addToWishlist');
 });

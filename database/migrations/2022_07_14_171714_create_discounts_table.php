@@ -13,14 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('cart_items', function (Blueprint $table) {
+        Schema::create('discounts', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id');
-            $table->integer('product_id');
-            $table->integer('quantity');
-            $table->integer('cart_id');
-            $table->integer('discount_id');
-            $table->double('discount_amount');
+            $table->enum('discount_type', ['fixed', 'percent']);
+            $table->double('discount_value');
             $table->timestamps();
         });
     }
@@ -32,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('cart_items');
+        Schema::dropIfExists('discounts');
     }
 };

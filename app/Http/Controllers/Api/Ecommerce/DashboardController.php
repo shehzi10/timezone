@@ -24,15 +24,25 @@ class DashboardController extends Controller
         return apiresponse(true, 'Dashboard Data', ['popular_watches' => $product, 'top_brands' => $brand, 'banners' => $banner, 'top_categories' => $category, 'latest_watches' => $products]);
     }
 
-    public function allBrands()
+    public function allBrands($search = "")
     {
-        $brand = Brand::orderBY('created_at', 'DESC')->paginate(10)->toArray();
+        $brand = array();
+        if ($search == "") {
+            $brand = Brand::orderBY('created_at', 'DESC')->paginate(10)->toArray();
+        } else {
+            $brand = Brand::where('brand_name', 'LIKE', '%' . $search . '%')->orderBY('created_at', 'DESC')->paginate(10)->toArray();
+        }
         return apiresponse(true, 'all brands', $brand);
     }
 
-    public function allCategories()
+    public function allCategories($search = "")
     {
-        $category = Category::orderBY('created_at', 'DESC')->paginate(10)->toArray();
+        $category = array();
+        if ($search == "") {
+            $category = Category::orderBY('created_at', 'DESC')->paginate(10)->toArray();
+        } else {
+            $category = Category::where('category_name', 'LIKE', '%' . $search . '%')->orderBY('created_at', 'DESC')->paginate(10)->toArray();
+        }
         return apiresponse(true, 'all categories', $category);
     }
 
