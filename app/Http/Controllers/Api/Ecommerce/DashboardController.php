@@ -16,7 +16,7 @@ class DashboardController extends Controller
     public function dashBoard()
     {
 
-        $product = Product::where('popular_watch', 1)->orderBY('created_at', 'DESC')->limit(10)->get()->toArray();
+        $product = Product::where('popular_watch', 1)->with(['category', 'brand', 'color'])->orderBY('created_at', 'DESC')->limit(10)->get()->toArray();
         $brand = Brand::where('top_brand', 1)->orderBY('created_at', 'DESC')->limit(10)->get()->toArray();
         $banner = Banners::where('banner_status', '1')->orderby('created_at', 'DESC')->get()->toArray();
         $category = Category::where('top_category', 1)->orderBY('created_at', 'DESC')->limit(10)->get()->toArray();
@@ -29,9 +29,9 @@ class DashboardController extends Controller
     {
         $brand = array();
         if ($search == "") {
-            $brand = Brand::orderBY('created_at', 'DESC')->paginate(10)->toArray();
+            $brand = Brand::orderBY('created_at', 'DESC')->get()->toArray();
         } else {
-            $brand = Brand::where('brand_name', 'LIKE', '%' . $search . '%')->orderBY('created_at', 'DESC')->paginate(10)->toArray();
+            $brand = Brand::where('brand_name', 'LIKE', '%' . $search . '%')->orderBY('created_at', 'DESC')->get()->toArray();
         }
         return apiresponse(true, 'all brands', $brand);
     }
@@ -40,22 +40,45 @@ class DashboardController extends Controller
     {
         $category = array();
         if ($search == "") {
-            $category = Category::orderBY('created_at', 'DESC')->paginate(10)->toArray();
+            $category = Category::orderBY('created_at', 'DESC')->get()->toArray();
         } else {
-            $category = Category::where('category_name', 'LIKE', '%' . $search . '%')->orderBY('created_at', 'DESC')->paginate(10)->toArray();
+            $category = Category::where('category_name', 'LIKE', '%' . $search . '%')->orderBY('created_at', 'DESC')->get()->toArray();
         }
         return apiresponse(true, 'all categories', $category);
     }
 
-    public function allWatches($type)
+    public function allWatches(Request $request)
     {
         $product = array();
-        if ($type == 'popular') {
-            $product = Product::where('popular_watch', 1)->orderBY('created_at', 'DESC')->paginate(10)->toArray();
-        } else if ($type == 'latest') {
-            $product = Product::orderBY('created_at', 'DESC')->paginate(10)->toArray();
+        if(isset($request->search))
+        {
+            if(isset($request->type))
+            {
+                if ($request->type == 'popular') {
+                    $product = Product::where('popular_watch', 1)->with(['brand', 'category', 'color'])->where('product_name', 'LIKE', $request->search. '%' )->orderBY('created_at', 'DESC')->simplePaginate(10)->toArray();
+                } else if ($request->type == 'latest') {
+                    $product = Product::with(['color', 'category', 'brand'])->where('product_name', 'LIKE', $request->search. '%' )->orderBY('created_at', 'DESC')->simplePaginate(10)->toArray();
+                }
+            }
+            else{
+                $product = Product::with(['brand', 'category', 'color'])->where('product_name', 'LIKE', $request->search. '%' )->orderBy('created_at', 'DESC')->simplePaginate(10);
+            }
         }
-        return apiresponse(true, 'all watches data', $product);
+        else
+        {
+            if(isset($request->type))
+            {
+                if ($request->type == 'popular') {
+                    $product = Product::where('popular_watch', 1)->with(['color', 'category', 'brand'])->orderBY('created_at', 'DESC')->simplePaginate(10)->toArray();
+                } else if ($request->type == 'latest') {
+                    $product = Product::with(['color', 'category', 'brand'])->orderBY('created_at', 'DESC')->simplePaginate(10)->toArray();
+                }
+            }
+            else{
+                $product = Product::with(['color', 'category', 'brand'])->orderBy('created_at', 'DESC')->simplePaginate(10);
+            }
+        }
+        return apiresponse(true, 'All watches found', $product);
     }
 
     public function watchDetail($watch_id)
@@ -87,16 +110,25 @@ class DashboardController extends Controller
 
     public function search($keyword)
     {
-        $products = Product::where('product_name', 'LIKE', '%' . $keyword . '%')->paginate(10)->toArray();
+        $products = Product::where('product_name', 'LIKE', '%' . $keyword . '%')->simplePaginate(10)->toArray();
         return apiresponse(true, 'Search Result', $products);
     }
 
     public function addAddress(Request $request)
     {
         Address::create([
-            'user_id' => $request->user()->id,
+            'user_id'           => $request->user()->id,
             'delivery_address'  =>  $request->address,
         ]);
         return apiresponse(true, 'Address added successfully', Address::where('user_id', $request->user()->id)->get()->toArray());
+    }
+
+
+    public function topCategoryProducts(){
+        $category = Category::with('products')->where("top_category","1")->orderBy('created_at', 'DESC')->get();
+        // Product::with(['category', 'brand', 'color'])->whereHas('category', function($query){
+        //     $query->where('top_category', '1');
+        // })->orderBy('created_at', 'DESC')->get();
+        return apiresponse(true, 'Top categories found', $category);
     }
 }

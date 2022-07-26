@@ -17,10 +17,10 @@ class AuthController extends Controller
 {
     public $stripe = "";
 
-    function __construct()
-    {
-        $this->stripe = new StripeClient(env("STRIPE_SECRET_KEY"));
-    }
+    // function __construct()
+    // {
+    //     $this->stripe = new StripeClient(env("STRIPE_SECRET_KEY"));
+    // }
     public function register(Request $request)
     {
 
@@ -33,13 +33,13 @@ class AuthController extends Controller
             return apiresponse(false, implode("\n", $validator->errors()->all()));
         }
 
-        $stripeCustomer = $this->stripe->customers->create([
-            'email' => $request->email,
-            'name' => $request->username,
-        ]);
+        // $stripeCustomer = $this->stripe->customers->create([
+        //     'email' => $request->email,
+        //     'name' => $request->username,
+        // ]);
 
         $data = $request->except(['password']);
-        $data['stripe_customer_id'] = $stripeCustomer->id;
+        // $data['stripe_customer_id'] = $stripeCustomer->id;
         $data['password'] = Hash::make($request->password);
 
         $user = User::create($data);

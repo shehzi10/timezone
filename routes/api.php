@@ -33,9 +33,10 @@ Route::group(['namespace' => 'App\Http\Controllers\Api\Ecommerce'], function () 
     Route::get('all_brands/{search}', 'DashboardController@allBrands');
     Route::get('all_categories', 'DashboardController@allCategories');
     Route::get('all_categories/{search}', 'DashboardController@allCategories');
-    Route::get('all_watches/{type}', 'DashboardController@allCategories');
+    Route::post('all_watches', 'DashboardController@allWatches');
     Route::get('watch_detail/{id}', 'DashboardController@watchDetail');
     Route::get('search/{keyword}', 'DashboardController@search');
+    Route::get('topCategoryProducts', 'DashboardController@topCategoryProducts');
 });
 
 
@@ -49,4 +50,5 @@ Route::group(['namespace' => 'App\Http\Controllers\Api\Ecommerce', 'middleware' 
     Route::get('show_cards', 'PaymentMethodController@showMethod');
     Route::post('delete_cards', 'PaymentMethodController@deleteMethod');
     Route::post('addToWishlist', 'WishlistController@addToWishlist');
+    Route::get('getUserWishlist', 'WishlistController@getUserWishlist');
 });
