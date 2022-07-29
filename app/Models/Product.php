@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Wishlist;
+use Illuminate\Support\Facades\Auth;
 
 class Product extends Model
 {
@@ -12,7 +14,7 @@ class Product extends Model
     protected $fillable = ['product_name', 'brand_id', 'category_id', 'color_id', 'price', 'gender' , 'style', 'image', 'case_material', 'availability',
                             'description', 'condition', 'weight', 'popular_watch'];
 
-    protected $append = ['wishlist'];
+    protected $appends = ['wishlist'];
 
     public function category(){
         return $this->belongsTo(Category::class, 'category_id', 'id');
@@ -28,11 +30,16 @@ class Product extends Model
 
     public function getWishlistAttribute(){
 
-        $wishlist = Wishlist::where('user_id', $this->user_id)->get();
-        if($wishlist->count() > 0)
+        if(!Auth::guard('api')->user()){
+            return false;
+        }
+        $wishlist = Wishlist::where(['user_id' => Auth::guard('api')->user()->id, 'product_id' => $this->id])->first();
+
+        if($wishlist)
         {
             return true;
         }
             return false;
+
     }
 }

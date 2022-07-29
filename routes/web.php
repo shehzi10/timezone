@@ -25,7 +25,7 @@ Route::group(['namespace' => 'App\Http\Controllers\Admin'], function () {
 
 
 
-Route::group(['prefix' => 'admin', 'namespace' => 'App\Http\Controllers\Admin', 'middleware' => 'auth'], function () {
+Route::group(['prefix' => 'admin', 'namespace' => 'App\Http\Controllers\Admin', 'middleware' => 'auth:admin'], function () {
 
     Route::get('product', 'ProductsController@product')->name('product');
 

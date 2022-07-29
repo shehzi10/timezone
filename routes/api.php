@@ -24,9 +24,8 @@ Route::group(['namespace' => 'App\Http\Controllers\Api\Ecommerce'], function () 
 
     Route::post('register', 'AuthController@register');
     Route::post('login', 'AuthController@login');
-    Route::post('sendForgotPasswordEmail', 'AuthController@sendForgotPasswordEmail');
-    Route::post('verifyForgotPin', 'AuthController@verifyForgotPin');
-    Route::post('resetPassword', 'AuthController@resetPassword');
+    Route::post('sendMail', 'ForgetPasswordController@sendMail');
+    Route::post('resetPassword', 'ForgetPasswordController@resetPassword');
 
     Route::get('dashboard', 'DashboardController@dashBoard');
     Route::get('all_brands', 'DashboardController@allBrands');
@@ -37,18 +36,23 @@ Route::group(['namespace' => 'App\Http\Controllers\Api\Ecommerce'], function () 
     Route::get('watch_detail/{id}', 'DashboardController@watchDetail');
     Route::get('search/{keyword}', 'DashboardController@search');
     Route::get('topCategoryProducts', 'DashboardController@topCategoryProducts');
+    Route::post('storeTrade', 'TradeController@storeTrade');
 });
 
 
 
 Route::group(['namespace' => 'App\Http\Controllers\Api\Ecommerce', 'middleware' => 'auth:api'], function () {
-
-    // Route::post('addtocart', 'CartController@addToCart');
-    // Route::post('updatecart', 'CartController@updateCart');
-    // Route::post('removecart', 'CartController@removeFromCart');
-    Route::post('add_card', 'PaymentMethodController@addPaymentMethod');
-    Route::get('show_cards', 'PaymentMethodController@showMethod');
-    Route::post('delete_cards', 'PaymentMethodController@deleteMethod');
+    // Route::get('dashboard', 'DashboardController@dashBoard');
+    Route::post('addtocart', 'CartController@addToCart');
+    Route::post('updatecart', 'CartController@updateCart');
+    Route::post('removecart', 'CartController@removeFromCart');
+    Route::post('addCard', 'PaymentMethodController@addPaymentMethod');
+    Route::get('showMethods', 'PaymentMethodController@showMethod');
+    Route::post('deleteMethod', 'PaymentMethodController@deleteMethod');
     Route::post('addToWishlist', 'WishlistController@addToWishlist');
     Route::get('getUserWishlist', 'WishlistController@getUserWishlist');
+    Route::post('updateProfile', 'ProfileController@updateProfile');
+    Route::post('changePassword', 'ExtrasController@changePassword');
+    Route::post('help', 'ExtrasController@help');
+    // Route::post('storeTrade', 'TradeController@storeTrade');
 });

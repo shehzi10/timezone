@@ -15,7 +15,6 @@ class DashboardController extends Controller
 {
     public function dashBoard()
     {
-
         $product = Product::where('popular_watch', 1)->with(['category', 'brand', 'color'])->orderBY('created_at', 'DESC')->limit(10)->get()->toArray();
         $brand = Brand::where('top_brand', 1)->orderBY('created_at', 'DESC')->limit(10)->get()->toArray();
         $banner = Banners::where('banner_status', '1')->orderby('created_at', 'DESC')->get()->toArray();
@@ -55,7 +54,14 @@ class DashboardController extends Controller
             if(isset($request->type))
             {
                 if ($request->type == 'popular') {
-                    $product = Product::where('popular_watch', 1)->with(['brand', 'category', 'color'])->where('product_name', 'LIKE', $request->search. '%' )->orderBY('created_at', 'DESC')->simplePaginate(10)->toArray();
+                    $base_product = Product::where('popular_watch', 1)->with(['brand', 'category', 'color']);
+                    if(isset($request->search )){
+                        $base_product = $base_product->where('product_name', 'LIKE', $request->search. '%' );
+                    }
+                    if(isset($request->search )){
+                        $base_product = $base_product->where('gender', 'LIKE', $request->search. '%' );
+                    }
+                    $product = $base_product->orderBY('created_at', 'DESC')->simplePaginate(10)->toArray();
                 } else if ($request->type == 'latest') {
                     $product = Product::with(['color', 'category', 'brand'])->where('product_name', 'LIKE', $request->search. '%' )->orderBY('created_at', 'DESC')->simplePaginate(10)->toArray();
                 }

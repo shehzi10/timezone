@@ -16,7 +16,7 @@ class PaymentMethodController extends Controller
 
     public function __construct()
     {
-        $this->stripe = new StripeClient(env('STRIPE_SK'));
+        $this->stripe = new StripeClient(env('STRIPE_SECRET_KEY'));
     }
 
     public function addPaymentMethod(Request $request)

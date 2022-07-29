@@ -23,7 +23,6 @@ class AuthController extends Controller
     // }
     public function register(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'name'      =>  'required',
             'email'     =>  'required|unique:users,email',
@@ -101,24 +100,7 @@ class AuthController extends Controller
     }
 
 
-    public function verifyForgotPin(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required',
-            'code'  => 'required'
-        ]);
 
-        if ($validator->fails()) {
-            return apiresponse(false, implode("\n", $validator->errors()->all()));
-        }
-
-        $user = User::where('email', $request->email)->first();
-        if ($request->code == $user->confirmation_code) {
-            return apiresponse(true, 'Confirmation code has been matched successfully', $user);
-        }
-
-        return apiresponse(false, 'Code missmatch');
-    }
 
     public function resetPassword(Request $request)
     {
