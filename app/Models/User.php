@@ -20,6 +20,13 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'profile_pic',
+        'country',
+        'city',
+        'address',
+        'stripe_customer_id',
+        'email_verified_at',
+        'remember_token',
     ];
 
     /**

@@ -54,5 +54,7 @@ Route::group(['namespace' => 'App\Http\Controllers\Api\Ecommerce', 'middleware' 
     Route::post('updateProfile', 'ProfileController@updateProfile');
     Route::post('changePassword', 'ExtrasController@changePassword');
     Route::post('help', 'ExtrasController@help');
+
+    Route::post('booking', 'OrderController@PlaceOrder');
     // Route::post('storeTrade', 'TradeController@storeTrade');
 });

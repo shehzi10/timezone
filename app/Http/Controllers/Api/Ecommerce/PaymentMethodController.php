@@ -45,25 +45,25 @@ class PaymentMethodController extends Controller
 
             $stripe_customer_id = $user->stripe_customer_id;
             $stripeCustomer = $this->stripe->customers->retrieve($stripe_customer_id);
-            //                return response()->json(["status" => "error", "data" => $stripeCustomer]);
-            $willBeDefault = ($stripeCustomer->default_source == null) ? true : false;
+            // return response()->json(["status" => "error", "data" => $stripeCustomer]);
+            $willBeDefault = ($stripeCustomer->default_source == null) ? '1' : '0';
             $source = $this->stripe->customers->createSource($stripe_customer_id, [
                 'source' => $token
             ]);
             //                echo"<pre>"; print_r($token); die();
-            if ($willBeDefault) {
+            if ($willBeDefault == '1') {
                 PaymentMethods::where('user_id', $user->id)->update(['is_default' => '0']);
             }
             $pm = PaymentMethods::create([
                 'card_brand' => $source->brand,
-                'stripe_source_id' => $source->id,
+                'stripe_card_id' => $source->id,
                 'card_end_number' => $source->last4,
                 'user_id' => $user->id,
                 'is_default' => $willBeDefault,
             ]);
-            $pms = PaymentMethods::where('user_id', $user->id)->paginate(10)->toArray();
+            $pms = PaymentMethods::where('user_id', $user->id)->get();
             $user = User::where("id", $user->id)->first();
-            return response()->json(['status' => 'success', 'msg' => 'Payment Method Updated', 'data' => ['user' => $user, 'pms' => $pms]]);
+            return response()->json(['status' => 'success', 'msg' => 'Payment Method Added', 'data' => ['user' => $user, 'pms' => $pms]]);
         } catch (Exception $e) {
             return response()->json(["status" => "error", "msg" => $e->getMessage()]);
         }
