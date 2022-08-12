@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductMedia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -49,39 +50,56 @@ class DashboardController extends Controller
     public function allWatches(Request $request)
     {
         $product = array();
-        if(isset($request->search))
-        {
-            if(isset($request->type))
-            {
-                if ($request->type == 'popular') {
-                    $base_product = Product::where('popular_watch', 1)->with(['brand', 'category', 'color']);
-                    if(isset($request->search )){
-                        $base_product = $base_product->where('product_name', 'LIKE', $request->search. '%' );
-                    }
-                    if(isset($request->search )){
-                        $base_product = $base_product->where('gender', 'LIKE', $request->search. '%' );
-                    }
-                    $product = $base_product->orderBY('created_at', 'DESC')->simplePaginate(10)->toArray();
-                } else if ($request->type == 'latest') {
-                    $product = Product::with(['color', 'category', 'brand'])->where('product_name', 'LIKE', $request->search. '%' )->orderBY('created_at', 'DESC')->simplePaginate(10)->toArray();
-                }
-            }
-            else{
-                $product = Product::with(['brand', 'category', 'color'])->where('product_name', 'LIKE', $request->search. '%' )->orderBy('created_at', 'DESC')->simplePaginate(10);
+        $where = array();
+        $order = "";
+
+        if (isset($request->filter_sort)) {
+            if ($request->filter_sort == 'popular') {
+                $where[] = array("popular_watch", '1');
+            } elseif ($request->filter_sort == 'latest') {
+                $order = "created_at DESC";
+            } elseif ($request->filter_sort == 'lowToHigh') {
+                $order = "price ASC";
             }
         }
-        else
-        {
-            if(isset($request->type))
-            {
+
+        if (isset($request->filter_gender)) {
+            $where[] = array("gender", $request->filter_gender);
+        }
+
+        if (isset($request->filter_color)) {
+            $where[] = array("color_id", $request->filter_color);
+        }
+
+        if (isset($request->filter_availability)) {
+            $where[] = array("availability", $request->filter_availability);
+        }
+        if (isset($request->search)) {
+            if (isset($request->type)) {
                 if ($request->type == 'popular') {
-                    $product = Product::where('popular_watch', 1)->with(['color', 'category', 'brand'])->orderBY('created_at', 'DESC')->simplePaginate(10)->toArray();
+                    $base_product = Product::where('popular_watch', 1)->where($where)->with(['brand', 'category', 'color']);
+                    if (isset($request->search)) {
+                        $base_product = $base_product->where('product_name', 'LIKE', $request->search . '%');
+                    }
+                    if (isset($request->search)) {
+                        $base_product = $base_product->where('gender', 'LIKE', $request->search . '%');
+                    }
+                    $product = $base_product->orderBYRaw(DB::raw($order))->simplePaginate(10)->toArray();
+                } else if ($request->type == 'latest') {
+                    $product = Product::with(['color', 'category', 'brand'])->where('product_name', 'LIKE', $request->search . '%')->orderBY('created_at', 'DESC')->simplePaginate(10)->toArray();
+                }
+            } else {
+                $product = Product::with(['brand', 'category', 'color'])->where('product_name', 'LIKE', $request->search . '%')->where($where)->orderByRaw(DB::raw($order))->simplePaginate(10);
+            }
+        } else {
+            if (isset($request->type)) {
+                if ($request->type == 'popular') {
+                    $product = Product::where('popular_watch', 1)->with(['color', 'category', 'brand'])->simplePaginate(10)->toArray();
                 } else if ($request->type == 'latest') {
                     $product = Product::with(['color', 'category', 'brand'])->orderBY('created_at', 'DESC')->simplePaginate(10)->toArray();
                 }
-            }
-            else{
-                $product = Product::with(['color', 'category', 'brand'])->orderBy('created_at', 'DESC')->simplePaginate(10);
+            } else {
+                $product = Product::where($where)->with(['color', 'category', 'brand'])->orderByRaw(DB::raw($order))->simplePaginate(10);
             }
         }
         return apiresponse(true, 'All watches found', $product);
@@ -130,8 +148,9 @@ class DashboardController extends Controller
     }
 
 
-    public function topCategoryProducts(){
-        $category = Category::with('products')->where("top_category","1")->orderBy('created_at', 'DESC')->get();
+    public function topCategoryProducts()
+    {
+        $category = Category::with('products')->where("top_category", "1")->orderBy('created_at', 'DESC')->get();
         // Product::with(['category', 'brand', 'color'])->whereHas('category', function($query){
         //     $query->where('top_category', '1');
         // })->orderBy('created_at', 'DESC')->get();
