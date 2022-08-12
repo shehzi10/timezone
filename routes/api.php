@@ -56,5 +56,6 @@ Route::group(['namespace' => 'App\Http\Controllers\Api\Ecommerce', 'middleware' 
     Route::post('help', 'ExtrasController@help');
 
     Route::post('booking', 'OrderController@PlaceOrder');
+    Route::get('orderHistory', 'OrderController@ordersHistory');
     // Route::post('storeTrade', 'TradeController@storeTrade');
 });

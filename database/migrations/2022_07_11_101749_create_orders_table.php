@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->integer('user_id');
             $table->integer('order_id');
-            $table->integer('payment_method_id');
-            $table->integer('delivery_address_id');
+            $table->string('payment_method_id');
+            $table->tinyText('address');
             $table->double('sub_total');
             $table->integer('vat_percent')->nullable();
             $table->double('vat_amount')->nullable();

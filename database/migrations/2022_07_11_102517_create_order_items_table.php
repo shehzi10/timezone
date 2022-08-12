@@ -18,10 +18,10 @@ return new class extends Migration
             $table->integer('user_id');
             $table->integer('order_id');
             $table->integer('product_id');
-            $table->integer('quantity');
+            // $table->integer('quantity');
             $table->double('price');
-            $table->integer('vat_percent')->nullable();
-            $table->double('vat_amount')->nullable();
+            // $table->integer('vat_percent')->nullable();
+            // $table->double('vat_amount')->nullable();
             $table->integer('discount_id')->nullable();
             $table->double('discount_amount')->nullable();
             $table->double('total_price');
