@@ -29,6 +29,7 @@ return new class extends Migration
             $table->string('weight')->nullable();
             $table->boolean('availability')->default(0);
             $table->string('popular_watch')->default(0);
+            $table->integer('discount_id')->default(0);
             $table->timestamps();
         });
     }

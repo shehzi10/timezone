@@ -63,22 +63,24 @@ class PaymentMethodController extends Controller
             ]);
             $pms = PaymentMethods::where('user_id', $user->id)->get();
             $user = User::where("id", $user->id)->first();
-            return response()->json(['status' => 'success', 'msg' => 'Payment Method Added', 'data' => ['user' => $user, 'pms' => $pms]]);
+            return apiresponse(true, 'Payment Method Added', $pm);
         } catch (Exception $e) {
-            return response()->json(["status" => "error", "msg" => $e->getMessage()]);
+            return apiresponse(false, $e->getMessage());
         }
     }
 
     public function updateMethod(Request $request)
     {
         try {
+            $user = $request->user();
             PaymentMethods::where('user_id', $request->user()->id)->update(['is_default' => '0']);
             PaymentMethods::where('stripe_card_id', $request->source_id)->update(['is_default' => '1']);
             $this->stripe->customers->update(
                 $request->user()->stripe_customer_id,
                 ['default_source' =>  $request->source_id]
             );
-            return apiresponse(true, 'Payment Method Updated');
+            $pms  = PaymentMethods::where(['user_id' => $user->id, 'status' => '0'])->get();
+            return apiresponse(true, 'Payment Method Updated', $pms);
         } catch (Exception $e) {
             return apiresponse(false, $e->getMessage());
         }
@@ -87,11 +89,14 @@ class PaymentMethodController extends Controller
     public function showMethod(Request $request)
     {
         $user = $request->user();
-        $data  = PaymentMethods::where(['user_id' => $user->id, 'status' => '0'])->paginate(10)->toArray();
+        $data  = PaymentMethods::where(['user_id' => $user->id, 'status' => '0'])->get();
+        //paginate(10)->toArray();
         if ($data) {
-            return response()->json(['status' => 'success', 'msg' => 'Payment Methods Found', 'data' => $data]);
+            return apiresponse(true, 'Payment Methods Found', $data);
+            // return response()->json(['success' => 'true', 'msg' => 'Payment Methods Found', 'data' => $data]);
         } else {
-            return response()->json(['status' => 'error', 'msg' => 'Not Found']);
+            return apiresponse(false, "No Methods Found");
+            // return response()->json(['success' => 'false', 'msg' => 'Not Found']);
         }
     }
 
@@ -99,9 +104,9 @@ class PaymentMethodController extends Controller
     {
         $data  = PaymentMethods::where('id', $request->id)->update(['status' => '1']);
         if ($data) {
-            return response()->json(['status' => 'success', 'msg' => 'Payment Methods Deleted']);
+            return apiresponse(true, 'Deleted Successfully', 1);
         } else {
-            return response()->json(['status' => 'error', 'msg' => 'unable to delete payment method. try again later']);
+            return apiresponse(false, 'Cannot Delete Payment Method');
         }
     }
 }
