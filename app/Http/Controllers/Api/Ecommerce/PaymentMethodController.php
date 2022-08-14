@@ -69,6 +69,21 @@ class PaymentMethodController extends Controller
         }
     }
 
+    public function updateMethod(Request $request)
+    {
+        try {
+            PaymentMethods::where('user_id', $request->user()->id)->update(['is_default' => '0']);
+            PaymentMethods::where('stripe_card_id', $request->source_id)->update(['is_default' => '1']);
+            $this->stripe->customers->update(
+                $request->user()->stripe_customer_id,
+                ['default_source' =>  $request->source_id]
+            );
+            return apiresponse(true, 'Payment Method Updated');
+        } catch (Exception $e) {
+            return apiresponse(false, $e->getMessage());
+        }
+    }
+
     public function showMethod(Request $request)
     {
         $user = $request->user();

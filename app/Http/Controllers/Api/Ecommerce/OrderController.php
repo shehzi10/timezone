@@ -62,6 +62,7 @@ class OrderController extends Controller
                 'vat_percent'           => $vat->vat_percent,
                 'vat_amount'            => $request->tax_amount,
                 'total'                 => $request->total,
+                "b_pickup"              => (isset($request->b_pickup) && $request->b_pickup != "") ? $request->b_pickup : '0',
                 'charge_id'             => $payment->id,
                 'blc_transaction_id'    => $payment->balance_transaction,
             ]);

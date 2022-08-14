@@ -24,6 +24,7 @@ return new class extends Migration
             $table->double('vat_amount')->nullable();
             $table->double('discount_amount')->nullable();
             $table->double('total');
+            $table->enum('b_pickup', ['0', '1'])->default('0');
             $table->string('charge_id');
             $table->tinyText('blc_transaction_id');
             $table->enum('status', ['in-process', 'cancel', 'complete', 'refund', 'on-hold', 'out-for-delivery'])->default('in-process');
