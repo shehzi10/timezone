@@ -7,6 +7,7 @@ use App\Models\Address;
 use App\Models\CartItems;
 use App\Models\PaymentMethods;
 use App\Models\User;
+use App\Models\Vat;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -19,6 +20,7 @@ class AuthController extends Controller
 
     function __construct()
     {
+        // die(env("STRIPE_SECRET_KEY"));
         $this->stripe = new StripeClient(env("STRIPE_SECRET_KEY"));
     }
 
@@ -58,6 +60,7 @@ class AuthController extends Controller
                     'user' => $user,
                     'payment_methods' => PaymentMethods::where('user_id', $user->id)->get()->toArray(),
                     'addresses' => Address::where('user_id', $user->id)->get()->toArray(),
+                    'vat'   => Vat::first()->toArray(),
                 ];
                 return apiresponse(true, 'Login Success', $data);
             } else {
@@ -90,6 +93,7 @@ class AuthController extends Controller
                     'user' => $user,
                     'payment_methods' => PaymentMethods::where('user_id', $user->id)->get()->toArray(),
                     'addresses' => Address::where('user_id', $user->id)->get()->toArray(),
+                    'vat'   => Vat::first()->toArray(),
                 ];
 
                 return apiresponse(true, 'Login Success', $data);
