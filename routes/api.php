@@ -25,6 +25,7 @@ Route::get('clear', function () {
     Artisan::call('config:clear');
     Artisan::call('cache:clear');
     Artisan::call('config:cache');
+    Artisan::call('route:cache');
     return apiresponse(true, "clear successfully");
 });
 
