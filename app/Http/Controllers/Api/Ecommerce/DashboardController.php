@@ -114,6 +114,25 @@ class DashboardController extends Controller
                 }
             }
         }
+        foreach ($product as $key => $watch) {
+            $media = ProductMedia::where('product_id', $watch->id)->get()->toArray();
+            $images = $videos = array();
+            if (!empty($media)) {
+                foreach ($media as $value) {
+                    $type = explode('.', $value['media']);
+                    if (in_array($type[1], ['mp4', 'mkv', 'wmv', '3gp'])) {
+                        $videos[] = $value;
+                    } else {
+                        $images[] = $value;
+                    }
+                }
+                $product[$key]['videos'] = $videos;
+                $product[$key]['images'] = $images;
+            } else {
+                $product[$key]['videos'] = $videos;
+                $product[$key]['images'] = $images;
+            }
+        }
         return apiresponse(true, 'All watches found', $product);
     }
 

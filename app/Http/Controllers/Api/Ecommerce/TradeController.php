@@ -11,15 +11,16 @@ use phpDocumentor\Reflection\Types\Null_;
 
 class TradeController extends Controller
 {
-    public function storeTrade(Request $request){
+    public function storeTrade(Request $request)
+    {
 
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'brand_id'      =>      'required',
             'model_name'    =>      'required',
 
         ]);
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return apiresponse(false, implode("\n", $validator->errors()->all()));
         }
 
@@ -37,16 +38,15 @@ class TradeController extends Controller
 
         $trade = Trade::create($data);
 
-        if($trade){
-            $validator = Validator::make($request->all(),[
+        if ($trade) {
+            $validator = Validator::make($request->all(), [
                 'images'    =>      'required',
             ]);
-            if($validator->fails())return apiresponse(false, implode("\n", $validator->errors()->all()));
-            if(isset($request->images) && $request->images != Null && count($request->images) > 0)
+            if ($validator->fails()) return apiresponse(false, implode("\n", $validator->errors()->all()));
+            if (isset($request->images) && $request->images != Null && count($request->images) > 0)
             // dd($request->images);
             {
-                foreach($request->file('images') as $image)
-                {
+                foreach ($request->file('images') as $image) {
                     $data['trade_id']       =       $trade->id;
                     $file                   =       $image;
                     $fileName = time() . '_' . $file->getClientOriginalName();
