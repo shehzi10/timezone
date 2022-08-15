@@ -23,7 +23,7 @@ class DashboardController extends Controller
         $products = Product::orderBy('created_at', 'DESC')->limit(10)->get()->toArray();
 
         foreach ($product as $key => $watch) {
-            $media = ProductMedia::where('product_id', $watch->id)->get()->toArray();
+            $media = ProductMedia::where('product_id', $watch['id'])->get()->toArray();
             $images = $videos = array();
             if (!empty($media)) {
                 foreach ($media as $value) {
@@ -43,7 +43,7 @@ class DashboardController extends Controller
         }
 
         foreach ($products as $key => $watch) {
-            $media = ProductMedia::where('product_id', $watch->id)->get()->toArray();
+            $media = ProductMedia::where('product_id', $watch['id'])->get()->toArray();
             $images = $videos = array();
             if (!empty($media)) {
                 foreach ($media as $value) {
