@@ -7,7 +7,6 @@ use App\Models\Trade;
 use App\Models\TradeImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use phpDocumentor\Reflection\Types\Null_;
 
 class TradeController extends Controller
 {

@@ -22,6 +22,46 @@ class DashboardController extends Controller
         $category = Category::where('top_category', 1)->orderBY('created_at', 'DESC')->limit(10)->get()->toArray();
         $products = Product::orderBy('created_at', 'DESC')->limit(10)->get()->toArray();
 
+        foreach ($product as $key => $watch) {
+            $media = ProductMedia::where('product_id', $watch->id)->get()->toArray();
+            $images = $videos = array();
+            if (!empty($media)) {
+                foreach ($media as $value) {
+                    $type = explode('.', $value['media']);
+                    if (in_array($type[1], ['mp4', 'mkv', 'wmv', '3gp'])) {
+                        $videos[] = $value;
+                    } else {
+                        $images[] = $value;
+                    }
+                }
+                $product[$key]['videos'] = $videos;
+                $product[$key]['images'] = $images;
+            } else {
+                $product[$key]['videos'] = $videos;
+                $product[$key]['images'] = $images;
+            }
+        }
+
+        foreach ($products as $key => $watch) {
+            $media = ProductMedia::where('product_id', $watch->id)->get()->toArray();
+            $images = $videos = array();
+            if (!empty($media)) {
+                foreach ($media as $value) {
+                    $type = explode('.', $value['media']);
+                    if (in_array($type[1], ['mp4', 'mkv', 'wmv', '3gp'])) {
+                        $videos[] = $value;
+                    } else {
+                        $images[] = $value;
+                    }
+                }
+                $products[$key]['videos'] = $videos;
+                $products[$key]['images'] = $images;
+            } else {
+                $products[$key]['videos'] = $videos;
+                $products[$key]['images'] = $images;
+            }
+        }
+
         return apiresponse(true, 'Dashboard Data', ['popular_watches' => $product, 'top_brands' => $brand, 'banners' => $banner, 'top_categories' => $category, 'latest_watches' => $products]);
     }
 
@@ -74,6 +114,14 @@ class DashboardController extends Controller
         if (isset($request->filter_availability)) {
             $where[] = array("availability", $request->filter_availability);
         }
+
+        if (isset($request->filter_brand)) {
+            $where[] = array("brand_id", $request->filter_brand);
+        }
+        if (isset($request->filter_category)) {
+            $where[] = array("color_id", $request->filter_category);
+        }
+
         if (isset($request->search)) {
             if (isset($request->type)) {
                 if ($request->type == 'popular') {
